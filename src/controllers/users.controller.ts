@@ -1,5 +1,5 @@
 import User from '~/models/schemas/User.schema'
-import { Request, Response, NextFunction } from 'express'
+import { Request, Response } from 'express'
 import databaseService from '~/services/database.services'
 
 export const loginController = (req: Request, res: Response) => {
@@ -25,6 +25,9 @@ export const registerController = async (req: Request, res: Response) => {
         password
       })
     )
+    return res.json({
+      message: 'register success'
+    })
   } catch (error) {
     console.log(error)
     return res.status(400).json({
