@@ -1,6 +1,6 @@
 import express from 'express'
 import { loginController, registerController } from '~/controllers/users.controller'
-import { loginValidator } from '~/middleware/users.middlewares'
+import { loginValidator, registerValidator } from '~/middleware/users.middlewares'
 const router = express.Router()
 
 router.get('/tweets', (req, res) => {
@@ -8,6 +8,9 @@ router.get('/tweets', (req, res) => {
 })
 
 router.post('/login', loginValidator, loginController)
-router.post('/register', registerController)
+
+
+// Description register a new user
+router.post('/register', registerValidator, registerController)
 
 export default router
