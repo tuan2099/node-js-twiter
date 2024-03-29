@@ -23,7 +23,8 @@ export const registerValidator = validate(checkSchema({
         max: 100,
       },
       errorMessage: 'min value must be greater than 1 or greater than 100'
-    }
+    },
+    errorMessage: 'please enter a valid value'
   },
   email: {
     notEmpty: true,

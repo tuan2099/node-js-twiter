@@ -1,5 +1,5 @@
 import express from 'express';
-import { body, validationResult, ContextRunner, ValidationChain } from 'express-validator';
+import { body, validationResult, ValidationChain } from 'express-validator';
 import { RunnableValidationChains } from 'express-validator/src/middlewares/schema';
 // can be reused by many routes
 
