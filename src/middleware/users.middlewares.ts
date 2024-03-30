@@ -30,7 +30,12 @@ export const registerValidator = validate(checkSchema({
     notEmpty: true,
     isEmail: true,
     trim: true,
-    errorMessage: 'Please enter a valid email address'
+    errorMessage: 'Please enter a valid email address',
+    custom: {
+      options: (value) => {
+
+      }
+    }
   },
   password: {
     notEmpty: true,
