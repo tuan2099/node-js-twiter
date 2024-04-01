@@ -1,6 +1,7 @@
 import express from 'express'
 import { loginController, registerController } from '~/controllers/users.controller'
 import { loginValidator, registerValidator } from '~/middleware/users.middlewares'
+import { wrapAsync } from '~/utils/handles'
 const router = express.Router()
 
 router.get('/tweets', (req, res) => {
@@ -9,8 +10,7 @@ router.get('/tweets', (req, res) => {
 
 router.post('/login', loginValidator, loginController)
 
-
 // Description register a new user
-router.post('/register', registerValidator, registerController)
+router.post('/register', registerValidator, registerController, wrapAsync(registerController))
 
 export default router
