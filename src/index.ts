@@ -11,9 +11,10 @@ app.use(express.json())
 app.use('/api', router)
 
 DatabaseService.connect()
-app.use((req: Request, res: Response, err: any, next: NextFunction) => {
+app.use((req: any, res: any, err: any, next: any) => {
   res.status(400).json({ error: err.message })
 })
+
 app.listen(port, () => {
   console.log('running in port 3000')
 })
