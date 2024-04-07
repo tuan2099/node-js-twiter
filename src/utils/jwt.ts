@@ -2,7 +2,7 @@ import jwt, { SignOptions } from 'jsonwebtoken'
 
 export const signToken = ({
   payload,
-  privateKey,
+  privateKey = process.env.JWT_SECRET,
   options = {
     algorithm: 'HS256'
   }

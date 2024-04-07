@@ -42,7 +42,10 @@ class UserService {
       this.signAccessToken(user_id),
       this.signRefreshToken(user_id)
     ])
-    return result
+    return {
+      access_token,
+      refresh_token
+    }
   }
   async checkEmailExists(email: string) {
     const user = await databaseService.users.findOne({ email })
