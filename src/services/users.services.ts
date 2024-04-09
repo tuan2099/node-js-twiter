@@ -28,7 +28,10 @@ class UserService {
       }
     })
   }
-
+  // tạo 1 function chung dùng nhiều lần
+  private signAccessAndRefreshToken(user_id: string) {
+    return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
+  }
   async register(payload: RegisterReqBody) {
     const result = await databaseService.users.insertOne(
       new User({
@@ -38,10 +41,7 @@ class UserService {
       })
     )
     const user_id = result.insertedId.toString()
-    const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id)
-    ])
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
     return {
       access_token,
       refresh_token
@@ -49,9 +49,10 @@ class UserService {
   }
   async checkEmailExists(email: string) {
     const user = await databaseService.users.findOne({ email })
-    // console.log(user)
     return Boolean(user)
   }
+
+  async login(user_id: string) {}
 }
 
 const userService = new UserService()

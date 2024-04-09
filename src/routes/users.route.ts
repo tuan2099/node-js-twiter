@@ -8,7 +8,7 @@ router.get('/tweets', (req, res) => {
   res.json({ data: [{ id: 1, name: 'Hoàng Anh Tuấn' }] })
 })
 
-router.post('/login', loginValidator, loginController)
+router.post('/login', loginValidator, wrapAsync(loginController))
 
 // Description register a new user
 router.post('/register', registerValidator, registerController, wrapAsync(registerController))

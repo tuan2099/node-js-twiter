@@ -1,18 +1,58 @@
 import { Request, Response, NextFunction } from 'express'
 import { checkSchema } from 'express-validator'
 import { USER_MESSAGE } from '~/constants/message'
+import databaseService from '~/services/database.services'
 import userService from '~/services/users.services'
 import { validate } from '~/utils/validator'
 
-export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body
-  if (!email || !password) {
-    return res.status(400).json({
-      error: 'Missing email or pass'
-    })
-  }
-  next()
-}
+export const loginValidator = validate(
+  checkSchema({
+    email: {
+      notEmpty: true,
+      isEmail: true,
+      trim: true,
+      errorMessage: 'Please enter a valid email address',
+      custom: {
+        options: async (value, { req }) => {
+          const user = await databaseService.users.findOne({ email: value })
+          if (user == null) {
+            throw new Error(USER_MESSAGE.USER_NOT_FOUND)
+          }
+          req.user = user // truyền user vào req cho bên controller
+          return true
+        }
+      }
+    },
+    password: {
+      notEmpty: true,
+      isString: true,
+      isLength: {
+        options: {
+          min: 8,
+          max: 100
+        }
+      },
+      isStrongPassword: {
+        options: {
+          minLength: 6,
+          minLowercase: 1,
+          minNumbers: 1,
+          minSymbols: 1,
+          minUppercase: 1
+        }
+      },
+      custom: {
+        // kiểm tra 2 pass có trùng nhau hay không
+        options: (value, { req }) => {
+          if (value !== req.body.password) {
+            throw new Error('Password confirmation dose not match password')
+          }
+          return true
+        }
+      }
+    }
+  })
+)
 
 export const registerValidator = validate(
   checkSchema({
