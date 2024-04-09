@@ -1,8 +1,8 @@
-import { Request, Response, NextFunction } from 'express'
 import { checkSchema } from 'express-validator'
 import { USER_MESSAGE } from '~/constants/message'
 import databaseService from '~/services/database.services'
 import userService from '~/services/users.services'
+import { hasPassword } from '~/utils/crypto'
 import { validate } from '~/utils/validator'
 
 export const loginValidator = validate(
@@ -14,9 +14,9 @@ export const loginValidator = validate(
       errorMessage: 'Please enter a valid email address',
       custom: {
         options: async (value, { req }) => {
-          const user = await databaseService.users.findOne({ email: value })
-          if (user == null) {
-            throw new Error(USER_MESSAGE.USER_NOT_FOUND)
+          const user = await databaseService.users.findOne({ email: value, password: hasPassword(req.body.password) })
+          if (user === null) {
+            throw new Error(USER_MESSAGE.EMAIL_OR_PASSWORD_IS_INCORRECT)
           }
           req.user = user // truyền user vào req cho bên controller
           return true
