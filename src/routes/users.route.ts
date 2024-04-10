@@ -13,4 +13,6 @@ router.post('/login', loginValidator, wrapAsync(loginController))
 // Description register a new user
 router.post('/register', registerValidator, registerController, wrapAsync(registerController))
 
+router.post('/logout')
+
 export default router

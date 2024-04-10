@@ -1,4 +1,4 @@
-// has pasword để mã hóa
+// has pasword để mã hóa khi lưu dưới databases
 import { createHash } from 'crypto'
 
 function sha256(content: string) {
