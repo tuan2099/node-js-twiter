@@ -8,6 +8,7 @@ import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
 
 class UserService {
+  // tạo access token
   private signAccessToken(user_id: string) {
     return signToken({
       payload: {
@@ -19,6 +20,7 @@ class UserService {
       }
     })
   }
+  // tạo refresh token
   private signRefreshToken(user_id: string) {
     return signToken({
       payload: {
@@ -30,11 +32,13 @@ class UserService {
       }
     })
   }
-  // tạo 1 function chung dùng nhiều lần
+  // tạo 1 function chung dùng nhiều lần - trả về 1 arr gồm refresh & access sau khi 2 hàm trên đã tạo xong
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
   }
+  // đămh kí user mới
   async register(payload: RegisterReqBody) {
+    // add new user to the list
     const result = await databaseService.users.insertOne(
       new User({
         ...payload,
@@ -42,8 +46,11 @@ class UserService {
         password: hasPassword(payload.password)
       })
     )
+    // conver id user to string
     const user_id = result.insertedId.toString()
+    // create access & refresh token for new user
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    // add access & refresh token to user
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
