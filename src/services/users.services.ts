@@ -55,6 +55,12 @@ class UserService {
       refresh_token
     }
   }
+  // async refreshToken(user_id: string) {
+  //   const [] = Promise.all([
+  //     this.signAccessToken({user_id, verify: UserVerifuStatus.Verified}),
+  //   ])
+  // }
+
   async checkEmailExists(email: string) {
     const user = await databaseService.users.findOne({ email })
     return Boolean(user)

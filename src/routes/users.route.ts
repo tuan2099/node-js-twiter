@@ -21,4 +21,5 @@ router.post('/register', registerValidator, registerController, wrapAsync(regist
 
 router.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
 
+// router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router

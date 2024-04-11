@@ -4,6 +4,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import userService from '~/services/users.services'
 import { ObjectId } from 'mongodb'
 import { USER_MESSAGE } from '~/constants/message'
+import { TokenPayLoad } from '~/models/Users/User.request'
 
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User // láy bên middleware
@@ -31,3 +32,8 @@ export const logoutController = async (req: Request, res: Response) => {
     result
   })
 }
+
+// export const refreshTokenController = async (req: Request, res: Response) => {
+//   const { user_id } = req.decoded_refresh_token as TokenPayLoad
+//   const result = await userService.refreshToken(user_id)
+// }
