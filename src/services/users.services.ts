@@ -73,6 +73,13 @@ class UserService {
       refresh_token
     }
   }
+
+  async logout(refresh_token: string) {
+    await databaseService.refreshTokens.deleteOne({ token: refresh_token })
+    return {
+      message: process.env.LOGOUT_SUCCESS
+    }
+  }
 }
 
 const userService = new UserService()

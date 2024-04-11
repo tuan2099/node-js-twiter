@@ -1,6 +1,5 @@
 import User from '~/models/schemas/User.schema'
 import { NextFunction, Request, Response } from 'express'
-import databaseService from '~/services/database.services'
 import { ParamsDictionary } from 'express-serve-static-core'
 import userService from '~/services/users.services'
 import { ObjectId } from 'mongodb'
@@ -20,6 +19,15 @@ export const registerController = async (req: Request<ParamsDictionary, any>, re
   const result = await userService.register(req.body)
   return res.json({
     message: USER_MESSAGE.REGISTER_SUCCESS,
+    result
+  })
+}
+
+export const logoutController = async (req: Request, res: Response) => {
+  const { refreshToken } = req.body // lấy refresh token từ body
+  const result = userService.logout(refreshToken)
+  return res.json({
+    message: USER_MESSAGE.LOGOUT_SUCCESS,
     result
   })
 }
