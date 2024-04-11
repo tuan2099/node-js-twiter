@@ -9,12 +9,13 @@ import { EntityError, ErrorWithStatus } from '~/models/Errors'
 export const validate = (validations: RunnableValidationChains<ValidationChain>) => {
   return async (req: express.Request, res: express.Response, next: express.NextFunction) => {
     await validations.run(req)
+    // save err to variable
     const errors = validationResult(req)
     // ko có lỗi thì tiếp tục req
     if (errors.isEmpty()) {
       return next()
     }
-
+    // if have a err, convert to OBJ
     const errorObject = errors.mapped()
     const entityError = new EntityError({ errors: {} })
     for (const key in errorObject) {
@@ -24,8 +25,6 @@ export const validate = (validations: RunnableValidationChains<ValidationChain>)
       }
       entityError.errors[key] = errorObject[key]
     }
-
-
     next(entityError)
   }
 }

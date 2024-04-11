@@ -68,11 +68,13 @@ class UserService {
   //   ])
   // }
 
+  // tìm trong users db xem có email nào trùng với email gửi lên không
   async checkEmailExists(email: string) {
     const user = await databaseService.users.findOne({ email })
     return Boolean(user)
   }
 
+  // tạo access & refresh token gắn vào userID đăng nhập
   async login(user_id: string) {
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
     await databaseService.refreshTokens.insertOne(
@@ -87,6 +89,7 @@ class UserService {
     }
   }
 
+  // xóa bỏ refresh token để đăng xuất
   async logout(refresh_token: string) {
     await databaseService.refreshTokens.deleteOne({ token: refresh_token })
     return {
