@@ -74,6 +74,7 @@ class UserService {
     return Boolean(user)
   }
 
+  // tạo access & refresh token gắn vào userID đăng nhập
   async login(user_id: string) {
     // crreate token
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
@@ -91,6 +92,7 @@ class UserService {
     }
   }
 
+  // xóa bỏ refresh token để đăng xuất
   async logout(refresh_token: string) {
     // clear refresh token
     await databaseService.refreshTokens.deleteOne({ token: refresh_token })
