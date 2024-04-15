@@ -36,7 +36,7 @@ class UserService {
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
   }
-  // đămh kí user mới
+  // đăng kí user mới
   async register(payload: RegisterReqBody) {
     // add new user to the list
     const result = await databaseService.users.insertOne(
@@ -68,19 +68,23 @@ class UserService {
   //   ])
   // }
 
+  // check email trùng nhau
   async checkEmailExists(email: string) {
     const user = await databaseService.users.findOne({ email })
     return Boolean(user)
   }
 
   async login(user_id: string) {
+    // crreate token
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    // save refresh_token to database
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
         user_id: new ObjectId(user_id),
         token: refresh_token
       })
     )
+    // return token for user
     return {
       access_token,
       refresh_token
@@ -88,7 +92,9 @@ class UserService {
   }
 
   async logout(refresh_token: string) {
+    // clear refresh token
     await databaseService.refreshTokens.deleteOne({ token: refresh_token })
+    //return message
     return {
       message: process.env.LOGOUT_SUCCESS
     }
