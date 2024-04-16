@@ -6,6 +6,7 @@ import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enums'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
+import { USER_MESSAGE } from '~/constants/message'
 
 class UserService {
   // tạo access token
@@ -15,6 +16,7 @@ class UserService {
         user_id,
         token_type: TokenType.AccessToken
       },
+      privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string,
       options: {
         expiresIn: process.env.ACCESS_TOKEN_EXPRISE_IN
       }
@@ -27,29 +29,48 @@ class UserService {
         user_id,
         token_type: TokenType.RefeshToken
       },
+      privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string,
       options: {
         expiresIn: process.env.REFRESH_TOKEN_EXPRISE_IN
       }
     })
   }
+
+  private signEmailVerifyToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.EmailVerifyToken
+      },
+      privateKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string,
+      options: {
+        expiresIn: process.env.REFRESH_TOKEN_EXPRISE_IN
+      }
+    })
+  }
+
+
   // tạo 1 function chung dùng nhiều lần - trả về 1 arr gồm refresh & access sau khi 2 hàm trên đã tạo xong
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
   }
   // đăng kí user mới
   async register(payload: RegisterReqBody) {
+    const user_id = new ObjectId()
+    const email_verify_token = await this.signEmailVerifyToken(user_id.toString())
     // add new user to the list
     const result = await databaseService.users.insertOne(
       new User({
         ...payload,
+        _id: user_id,
+        email_verify_token,
         date_of_birth: new Date(payload.date_of_birth),
         password: hasPassword(payload.password)
       })
     )
-    // conver id user to string
-    const user_id = result.insertedId.toString()
+
     // create access & refresh token for new user
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id)
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken(user_id.toString())
     // add access & refresh token to user
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
@@ -99,6 +120,25 @@ class UserService {
     //return message
     return {
       message: process.env.LOGOUT_SUCCESS
+    }
+  }
+
+  async verifyEmail(user_id: string) {
+    const [token] = await Promise.all([this.signAccessAndRefreshToken(user_id), databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      {
+        $set: {
+          email_verify_token: '',
+          updated_at: new Date()
+        }
+      }
+    )])
+
+    const [access_token, refresh_token] = token
+
+    return {
+      access_token,
+      refresh_token
     }
   }
 }

@@ -1,8 +1,8 @@
 import express from 'express'
-import { USER_MESSAGE } from '~/constants/message'
-import { loginController, logoutController, registerController } from '~/controllers/users.controller'
+import { loginController, logoutController, registerController, verifyEmailController } from '~/controllers/users.controller'
 import {
   accessTokenValidator,
+  emailVerifyTokenValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator
@@ -10,16 +10,34 @@ import {
 import { wrapAsync } from '~/utils/handles'
 const router = express.Router()
 
-router.get('/tweets', (req, res) => {
-  res.json({ data: [{ id: 1, name: 'Hoàng Anh Tuấn' }] })
-})
-
+// Description login user
 router.post('/login', loginValidator, wrapAsync(loginController))
 
-// Description register a new user
+/**
+ * Description. Register a new user
+ * Path: /register
+ * Method: POST
+ * Body: { name: string, email: string, password: string, confirm_password: string, date_of_birth: ISO8601 }
+ */
 router.post('/register', registerValidator, registerController, wrapAsync(registerController))
 
+/**
+ * Description. Logout a user
+ * Path: /logout
+ * Method: POST
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: { refresh_token: string }
+ */
 router.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(logoutController))
+
+/**
+ * Description. Verify email when user client click on the link in email
+ * Path: /verify-email
+ * Method: POST
+ * Body: { email_verify_token: string }
+ */
+router.post('/verify-email', emailVerifyTokenValidator, wrapAsync(verifyEmailController))
+
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
