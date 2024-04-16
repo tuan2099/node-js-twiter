@@ -3,7 +3,7 @@ import databaseService from './database.services'
 import { RegisterReqBody } from '~/models/Users/User.request'
 import { hasPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
-import { TokenType } from '~/constants/enums'
+import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
 import { USER_MESSAGE } from '~/constants/message'
@@ -129,6 +129,7 @@ class UserService {
       {
         $set: {
           email_verify_token: '',
+          verify: UserVerifyStatus.Verified,
           updated_at: new Date()
         }
       }
