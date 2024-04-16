@@ -1,5 +1,5 @@
 import express from 'express'
-import { loginController, logoutController, registerController, verifyEmailController } from '~/controllers/users.controller'
+import { loginController, logoutController, registerController, resendVerifyEmailController, verifyEmailController } from '~/controllers/users.controller'
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
@@ -38,6 +38,7 @@ router.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(lo
  */
 router.post('/verify-email', emailVerifyTokenValidator, wrapAsync(verifyEmailController))
 
+router.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendVerifyEmailController))
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
