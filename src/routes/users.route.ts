@@ -1,5 +1,11 @@
 import express from 'express'
-import { loginController, logoutController, registerController, resendVerifyEmailController, verifyEmailController } from '~/controllers/users.controller'
+import {
+  loginController,
+  logoutController,
+  registerController,
+  resendVerifyEmailController,
+  verifyEmailController
+} from '~/controllers/users.controller'
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,

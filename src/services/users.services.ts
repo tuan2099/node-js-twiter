@@ -49,7 +49,6 @@ class UserService {
     })
   }
 
-
   // tạo 1 function chung dùng nhiều lần - trả về 1 arr gồm refresh & access sau khi 2 hàm trên đã tạo xong
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
@@ -124,16 +123,21 @@ class UserService {
   }
 
   async verifyEmail(user_id: string) {
-    const [token] = await Promise.all([this.signAccessAndRefreshToken(user_id), databaseService.users.updateOne(
-      { _id: new ObjectId(user_id) },
-      {
-        $set: [{
-          email_verify_token: '',
-          verify: UserVerifyStatus.Verified,
-          updated_at: "$$NOW"
-        }]
-      }
-    )])
+    const [token] = await Promise.all([
+      this.signAccessAndRefreshToken(user_id),
+      databaseService.users.updateOne(
+        { _id: new ObjectId(user_id) },
+        {
+          $set: [
+            {
+              email_verify_token: '',
+              verify: UserVerifyStatus.Verified,
+              updated_at: '$$NOW'
+            }
+          ]
+        }
+      )
+    ])
 
     const [access_token, refresh_token] = token
 
@@ -147,17 +151,20 @@ class UserService {
     const email_verify_token = await this.signEmailVerifyToken(user_id)
     console.log('resend email', email_verify_token)
 
-    // 
-    await databaseService.users.updateOne({
-      _id: new ObjectId(user_id)
-    }, {
-      $set: {
-        email_verify_token,
+    //
+    await databaseService.users.updateOne(
+      {
+        _id: new ObjectId(user_id)
       },
-      $currentDate: {
-        updated_at: true
+      {
+        $set: {
+          email_verify_token
+        },
+        $currentDate: {
+          updated_at: true
+        }
       }
-    })
+    )
 
     return {
       message: USER_MESSAGE.RESEND_VERIFY_EMAIL_SUCCESS

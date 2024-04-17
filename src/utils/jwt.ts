@@ -24,13 +24,7 @@ export const signToken = ({
 
 // verify access_token
 
-export const verifyToken = ({
-  token,
-  publicKey
-}: {
-  token: string
-  publicKey: string
-}) => {
+export const verifyToken = ({ token, publicKey }: { token: string; publicKey: string }) => {
   return new Promise<TokenPayLoad>((resolve, reject) => {
     jwt.verify(token, publicKey, (error, decoded) => {
       if (error) {
