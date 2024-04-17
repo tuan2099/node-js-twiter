@@ -22,3 +22,7 @@ export interface LoginReqBody {
   email: string
   password: string
 }
+
+export interface ForgotPassReqBody {
+  email: string
+}

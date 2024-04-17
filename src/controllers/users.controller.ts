@@ -4,7 +4,7 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import userService from '~/services/users.services'
 import { ObjectId } from 'mongodb'
 import { USER_MESSAGE } from '~/constants/message'
-import { TokenPayLoad } from '~/models/Users/User.request'
+import { ForgotPassReqBody, TokenPayLoad } from '~/models/Users/User.request'
 import databaseService from '~/services/database.services'
 import httpStatus from '~/constants/httpStatus'
 import { UserVerifyStatus } from '~/constants/enums'
@@ -36,18 +36,15 @@ export const logoutController = async (req: Request, res: Response) => {
   })
 }
 
-
-
 // export const refreshTokenController = async (req: Request, res: Response) => {
 //   const { user_id } = req.decoded_refresh_token as TokenPayLoad
 //   const result = await userService.refreshToken(user_id)
 // }
 
 export const verifyEmailController = async (req: Request, res: Response) => {
-  const { user_id } = req.decoded_email_verify_token as TokenPayLoad;
+  const { user_id } = req.decoded_email_verify_token as TokenPayLoad
   const user = await databaseService.users.findOne({
-    _id: new ObjectId(user_id),
-
+    _id: new ObjectId(user_id)
   })
   // nếu ko tìm thấy user
   if (!user) {
@@ -55,7 +52,7 @@ export const verifyEmailController = async (req: Request, res: Response) => {
       message: USER_MESSAGE.USER_NOT_FOUND
     })
   }
-  // đã verify rồi thì ko báo lỗi nữa 
+  // đã verify rồi thì ko báo lỗi nữa
   if (user.email_verify_token === '') {
     return res.json({
       message: USER_MESSAGE.EMAIL_ALREADY_VERIFIED_BEFORE
@@ -86,4 +83,16 @@ export const resendVerifyEmailController = async (req: Request, res: Response, n
 
   const result = await userService.resendVerifyEmail(user_id)
   return res.json(result)
+}
+
+export const forgotPasswordController = async (
+  req: Request<ParamsDictionary, any, ForgotPassReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { _id } = req.body as User
+  const result = await userService.forgotPass((_id as ObjectId).toString())
+  return res.json({
+    result
+  })
 }

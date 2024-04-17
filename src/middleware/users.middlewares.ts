@@ -265,3 +265,26 @@ export const emailVerifyTokenValidator = validate(
     ['body']
   )
 )
+
+export const forgotPasswordValidator = validate(
+  checkSchema(
+    {
+      email: {
+        notEmpty: true,
+        isEmail: { errorMessage: USER_MESSAGE.EMAIL_IS_INVALID },
+        trim: true,
+        custom: {
+          options: async (value, { req }) => {
+            const user = await databaseService.users.findOne({ email: value })
+            if (user === null) {
+              throw new Error(USER_MESSAGE.USER_NOT_FOUND)
+            }
+            req.user = user // truyền user vào req cho bên controller
+            return true
+          }
+        }
+      }
+    },
+    ['body']
+  )
+)

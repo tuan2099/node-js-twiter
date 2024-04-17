@@ -1,5 +1,6 @@
 import express from 'express'
 import {
+  forgotPasswordController,
   loginController,
   logoutController,
   registerController,
@@ -9,6 +10,7 @@ import {
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
+  forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
   registerValidator
@@ -44,7 +46,22 @@ router.post('/logout', accessTokenValidator, refreshTokenValidator, wrapAsync(lo
  */
 router.post('/verify-email', emailVerifyTokenValidator, wrapAsync(verifyEmailController))
 
+/**
+ * Description. Verify email when user client click on the link in email
+ * Path: /resend-verify-email
+ * Method: POST
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: {}
+ */
 router.post('/resend-verify-email', accessTokenValidator, wrapAsync(resendVerifyEmailController))
+
+/**
+ * Description. Submit email to reset password, send email to user
+ * Path: /forgot-password
+ * Method: POST
+ * Body: {email: string}
+ */
+router.post('/forgot-password', forgotPasswordValidator, wrapAsync(forgotPasswordController))
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router

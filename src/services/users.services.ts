@@ -49,6 +49,19 @@ class UserService {
     })
   }
 
+  private signForgotPassToken(user_id: string) {
+    return signToken({
+      payload: {
+        user_id,
+        token_type: TokenType.signForgotPassToken
+      },
+      privateKey: process.env.JWT_SECRET_FORGOT_PASS_TOKEN as string,
+      options: {
+        expiresIn: process.env.FORGOT_PASS_TOKEN_EXPRISE_IN
+      }
+    })
+  }
+
   // tạo 1 function chung dùng nhiều lần - trả về 1 arr gồm refresh & access sau khi 2 hàm trên đã tạo xong
   private signAccessAndRefreshToken(user_id: string) {
     return Promise.all([this.signAccessToken(user_id), this.signRefreshToken(user_id)])
@@ -168,6 +181,18 @@ class UserService {
 
     return {
       message: USER_MESSAGE.RESEND_VERIFY_EMAIL_SUCCESS
+    }
+  }
+
+  async forgotPass(user_id: string) {
+    const forgot_pass_token = await this.signForgotPassToken(user_id)
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(user_id) },
+      { $set: { forgot_pass_token }, $currentDate: { updated_at: true } }
+    )
+    console.log('forgot pass token', forgot_pass_token)
+    return {
+      message: USER_MESSAGE.CHECK_EMAIL_TO_RESET_PASSWORD
     }
   }
 }
