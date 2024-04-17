@@ -102,3 +102,10 @@ export const verifyForgotPasswordController = async (req: Request, res: Response
     message: USER_MESSAGE.VERIFY_FORGOT_PASSWORD_SUCCESS
   })
 }
+
+export const resetPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_forgot_password_token as TokenPayLoad
+  const { password } = req.body
+  const result = await userService.resetPassword(user_id, password)
+  return res.json(result)
+}
