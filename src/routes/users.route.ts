@@ -1,6 +1,7 @@
 import express from 'express'
 import {
   forgotPasswordController,
+  getMeController,
   loginController,
   logoutController,
   registerController,
@@ -82,5 +83,13 @@ router.post('/verify-forgot-password', verifyForgotPasswordTokenValidator, wrapA
  * Body: {forgot_password_token: string, password: string, confirm_password: string}
  */
 router.post('/reset-password', resetPasswordValidator, wrapAsync(resetPasswordController))
+
+/**
+ * Description: Get my profile
+ * Path: /me
+ * Method: GET
+ * Header: { Authorization: Bearer <access_token> }
+ */
+router.get('/me', accessTokenValidator, wrapAsync(getMeController))
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
