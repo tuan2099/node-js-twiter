@@ -91,5 +91,15 @@ router.post('/reset-password', resetPasswordValidator, wrapAsync(resetPasswordCo
  * Header: { Authorization: Bearer <access_token> }
  */
 router.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
+/**
+ * Description: Update my profile
+ * Path: /me
+ * Method: PATCH
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: UserSchema
+ */
+router.get('/me', accessTokenValidator, wrapAsync(getMeController))
+
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
