@@ -7,6 +7,7 @@ import {
   registerController,
   resendVerifyEmailController,
   resetPasswordController,
+  updateMeController,
   verifyEmailController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
@@ -18,6 +19,7 @@ import {
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  verifiedUserValidator,
   verifyForgotPasswordTokenValidator
 } from '~/middleware/users.middlewares'
 import { wrapAsync } from '~/utils/handles'
@@ -99,7 +101,7 @@ router.get('/me', accessTokenValidator, wrapAsync(getMeController))
  * Header: { Authorization: Bearer <access_token> }
  * Body: UserSchema
  */
-router.get('/me', accessTokenValidator, wrapAsync(getMeController))
+router.get('/me', accessTokenValidator, verifiedUserValidator, wrapAsync(updateMeController))
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router

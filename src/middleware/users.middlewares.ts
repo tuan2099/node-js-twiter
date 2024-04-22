@@ -11,6 +11,8 @@ import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validator'
 import { capitalize } from 'lodash'
 import { ObjectId } from 'mongodb'
+import { TokenPayLoad } from '~/models/Users/User.request'
+import { UserVerifyStatus } from '~/constants/enums'
 
 // Khai báo schema sử dung chung
 const passwordSchema: ParamSchema = {
@@ -292,7 +294,7 @@ export const accessTokenValidator = validate(
                 token: access_token,
                 publicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
-              ;(req as Request).decoded_authourization = decoded_authourization
+                ; (req as Request).decoded_authourization = decoded_authourization
             } catch (error) {
               throw new ErrorWithStatus({
                 message: (error as JsonWebTokenError).message,
@@ -373,7 +375,7 @@ export const emailVerifyTokenValidator = validate(
                 token: value,
                 publicKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string
               })
-              ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
+                ; (req as Request).decoded_email_verify_token = decoded_email_verify_token
 
               return true
             } catch (error) {
@@ -475,3 +477,18 @@ export const resetPasswordValidator = validate(
     ['body']
   )
 )
+
+
+
+export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
+  const { verify } = req.decoded_authourization as TokenPayLoad
+
+  if (verify !== UserVerifyStatus.Unverified) {
+    return next(new ErrorWithStatus({
+      message: USER_MESSAGE.USER_NOT_VERIFIED,
+      status: httpStatus.NOT_FOUND
+    }))
+  }
+
+  next()
+}

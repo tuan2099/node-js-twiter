@@ -12,7 +12,7 @@ import { UserVerifyStatus } from '~/constants/enums'
 export const loginController = async (req: Request, res: Response) => {
   const user = req.user as User // láy bên middleware
   const user_id = user._id as ObjectId
-  const result = await userService.login(user_id.toString())
+  const result = await userService.login({ user_id: user_id.toString(), verify: user.verify })
   return res.json({
     message: USER_MESSAGE.LOGIN_SUCCESS,
     result
@@ -90,8 +90,8 @@ export const forgotPasswordController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { _id } = req.body as User
-  const result = await userService.forgotPass((_id as ObjectId).toString())
+  const { _id, verify } = req.body as User
+  const result = await userService.forgotPass({ user_id: (_id as ObjectId).toString(), verify })
   return res.json({
     result
   })
@@ -116,5 +116,12 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
   return res.json({
     message: USER_MESSAGE.GET_PROFILE_SUCCESS,
     result: user
+  })
+}
+
+
+export const updateMeController = async (req: Request, res: Response, next: NextFunction) => {
+  return res.json({
+
   })
 }
