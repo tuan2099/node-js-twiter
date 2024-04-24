@@ -9,7 +9,7 @@ import userService from '~/services/users.services'
 import { hasPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validator'
-import { capitalize } from 'lodash'
+import { capitalize, isLength } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { TokenPayLoad } from '~/models/Users/User.request'
 import { UserVerifyStatus } from '~/constants/enums'
@@ -119,6 +119,16 @@ const forgotPasswordTokenSchema: ParamSchema = {
   }
 }
 
+const dateOfBirthSchema: ParamSchema = {
+  isISO8601: {
+    options: {
+      strict: true,
+      strictSeparator: true
+    },
+    errorMessage: USER_MESSAGE.DATE_OF_BIRTH_MUST_BE_ISO8601
+  }
+}
+
 const nameSchema: ParamSchema = {
   notEmpty: {
     errorMessage: USER_MESSAGE.NAME_IS_REQUIRED
@@ -192,22 +202,7 @@ export const loginValidator = validate(
 export const registerValidator = validate(
   checkSchema(
     {
-      name: {
-        notEmpty: {
-          errorMessage: USER_MESSAGE.NAME_IS_REQUIRED
-        },
-        isString: {
-          errorMessage: USER_MESSAGE.NAME_MUST_BE_A_STRING
-        },
-        trim: true,
-        isLength: {
-          options: {
-            min: 1,
-            max: 100
-          },
-          errorMessage: USER_MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_100
-        }
-      },
+      name: nameSchema,
       email: {
         notEmpty: true,
         isEmail: true,
@@ -294,7 +289,7 @@ export const accessTokenValidator = validate(
                 token: access_token,
                 publicKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
               })
-                ; (req as Request).decoded_authourization = decoded_authourization
+              ;(req as Request).decoded_authourization = decoded_authourization
             } catch (error) {
               throw new ErrorWithStatus({
                 message: (error as JsonWebTokenError).message,
@@ -375,7 +370,7 @@ export const emailVerifyTokenValidator = validate(
                 token: value,
                 publicKey: process.env.JWT_SECRET_EMAIL_VERIFY_TOKEN as string
               })
-                ; (req as Request).decoded_email_verify_token = decoded_email_verify_token
+              ;(req as Request).decoded_email_verify_token = decoded_email_verify_token
 
               return true
             } catch (error) {
@@ -478,17 +473,118 @@ export const resetPasswordValidator = validate(
   )
 )
 
-
-
 export const verifiedUserValidator = (req: Request, res: Response, next: NextFunction) => {
   const { verify } = req.decoded_authourization as TokenPayLoad
 
   if (verify !== UserVerifyStatus.Unverified) {
-    return next(new ErrorWithStatus({
-      message: USER_MESSAGE.USER_NOT_VERIFIED,
-      status: httpStatus.NOT_FOUND
-    }))
+    return next(
+      new ErrorWithStatus({
+        message: USER_MESSAGE.USER_NOT_VERIFIED,
+        status: httpStatus.NOT_FOUND
+      })
+    )
   }
 
   next()
 }
+
+export const updateMeValidator = validate(
+  checkSchema(
+    {
+      name: {
+        ...nameSchema,
+        optional: true,
+        notEmpty: true
+      },
+      date_of_birth: {
+        ...dateOfBirthSchema,
+        optional: true
+      },
+      bio: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.BIO_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: USER_MESSAGE.BIO_LENGTH
+        }
+      },
+      location: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.LOCATION_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: USER_MESSAGE.LOCATION_LENGTH
+        }
+      },
+      website: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.WEBSITE_LENGTH
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: USER_MESSAGE.WEBSITE_MUST_BE_STRING
+        }
+      },
+      username: {
+        optional: true,
+        isString: {
+          errorMessage: USER_MESSAGE.USERNAME_MUST_BE_STRING
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: ' từ 1 đến 200 kí tự'
+        }
+      },
+      avatar: {
+        optional: true,
+        isString: {
+          errorMessage: 'phải là string'
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: '1-200 kí tự'
+        }
+      },
+      cover_photo: {
+        optional: true,
+        isString: {
+          errorMessage: 'phải là string'
+        },
+        trim: true,
+        isLength: {
+          options: {
+            min: 1,
+            max: 200
+          },
+          errorMessage: '1-200 kí tự'
+        }
+      }
+    },
+    ['body']
+  )
+)

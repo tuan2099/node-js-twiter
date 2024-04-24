@@ -10,7 +10,7 @@ import { USER_MESSAGE } from '~/constants/message'
 
 class UserService {
   // tạo access token
-  private signAccessToken({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  private signAccessToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
@@ -24,7 +24,7 @@ class UserService {
     })
   }
   // tạo refresh token
-  private signRefreshToken({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  private signRefreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
@@ -38,7 +38,7 @@ class UserService {
     })
   }
 
-  private signEmailVerifyToken({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  private signEmailVerifyToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
@@ -52,7 +52,7 @@ class UserService {
     })
   }
 
-  private signForgotPassToken({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  private signForgotPassToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return signToken({
       payload: {
         user_id,
@@ -67,13 +67,16 @@ class UserService {
   }
 
   // tạo 1 function chung dùng nhiều lần - trả về 1 arr gồm refresh & access sau khi 2 hàm trên đã tạo xong
-  private signAccessAndRefreshToken({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  private signAccessAndRefreshToken({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     return Promise.all([this.signAccessToken({ user_id, verify }), this.signRefreshToken({ user_id, verify })])
   }
   // đăng kí user mới
   async register(payload: RegisterReqBody) {
     const user_id = new ObjectId()
-    const email_verify_token = await this.signEmailVerifyToken({ user_id: user_id.toString(), verify: UserVerifyStatus.Unverified })
+    const email_verify_token = await this.signEmailVerifyToken({
+      user_id: user_id.toString(),
+      verify: UserVerifyStatus.Unverified
+    })
     // add new user to the list
     const result = await databaseService.users.insertOne(
       new User({
@@ -86,7 +89,10 @@ class UserService {
     )
 
     // create access & refresh token for new user
-    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id: user_id.toString(), verify: UserVerifyStatus.Unverified })
+    const [access_token, refresh_token] = await this.signAccessAndRefreshToken({
+      user_id: user_id.toString(),
+      verify: UserVerifyStatus.Unverified
+    })
     // add access & refresh token to user
     await databaseService.refreshTokens.insertOne(
       new RefreshToken({
@@ -112,7 +118,7 @@ class UserService {
   }
 
   // tạo access & refresh token gắn vào userID đăng nhập
-  async login({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  async login({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     // create token
     const [access_token, refresh_token] = await this.signAccessAndRefreshToken({ user_id, verify })
     // save refresh_token to database
@@ -188,7 +194,7 @@ class UserService {
     }
   }
 
-  async forgotPass({ user_id, verify }: { user_id: string, verify: UserVerifyStatus }) {
+  async forgotPass({ user_id, verify }: { user_id: string; verify: UserVerifyStatus }) {
     const forgot_pass_token = await this.signForgotPassToken({ user_id, verify })
     await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
@@ -230,6 +236,25 @@ class UserService {
       }
     )
     return user
+  }
+
+  async updateMe(user_id: string, payload: any) {
+    const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
+    const user = await databaseService.users.findOneAndUpdate(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          ..._payload
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      }
+    )
+
+    return user.value
   }
 }
 

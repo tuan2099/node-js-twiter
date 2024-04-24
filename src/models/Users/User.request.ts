@@ -26,3 +26,14 @@ export interface LoginReqBody {
 export interface ForgotPassReqBody {
   email: string
 }
+
+export interface UpdateReqBody {
+  name?: string
+  date_of_birth: string
+  bio: string
+  location: string
+  website: string
+  username: string
+  avatar: string
+  cover_photo: string
+}

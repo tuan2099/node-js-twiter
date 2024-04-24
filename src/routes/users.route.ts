@@ -11,6 +11,7 @@ import {
   verifyEmailController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
+import { filterMiddleware } from '~/middleware/common.middleware'
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
@@ -19,6 +20,7 @@ import {
   refreshTokenValidator,
   registerValidator,
   resetPasswordValidator,
+  updateMeValidator,
   verifiedUserValidator,
   verifyForgotPasswordTokenValidator
 } from '~/middleware/users.middlewares'
@@ -101,7 +103,14 @@ router.get('/me', accessTokenValidator, wrapAsync(getMeController))
  * Header: { Authorization: Bearer <access_token> }
  * Body: UserSchema
  */
-router.get('/me', accessTokenValidator, verifiedUserValidator, wrapAsync(updateMeController))
+router.get(
+  '/me',
+  accessTokenValidator,
+  verifiedUserValidator,
+  updateMeValidator,
+  filterMiddleware(['name', 'date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']),
+  wrapAsync(updateMeController)
+)
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
