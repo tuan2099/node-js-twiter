@@ -2,6 +2,7 @@ import express from 'express'
 import {
   forgotPasswordController,
   getMeController,
+  getProfileController,
   loginController,
   logoutController,
   registerController,
@@ -111,6 +112,13 @@ router.get(
   filterMiddleware(['name', 'date_of_birth', 'bio', 'location', 'website', 'username', 'avatar', 'cover_photo']),
   wrapAsync(updateMeController)
 )
+
+/**
+ * Description: Get user profile
+ * Path: /:username
+ * Method: GET
+ */
+router.get('/:username', wrapAsync(getProfileController))
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router
