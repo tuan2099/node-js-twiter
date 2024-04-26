@@ -1,5 +1,6 @@
 import express from 'express'
 import {
+  followUserController,
   forgotPasswordController,
   getMeController,
   getProfileController,
@@ -119,6 +120,15 @@ router.get(
  * Method: GET
  */
 router.get('/:username', wrapAsync(getProfileController))
+
+/**
+ * Description: Follow someone
+ * Path: /follow
+ * Method: POST
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: { followed_user_id: string }
+ */
+router.post('/follow', accessTokenValidator, verifiedUserValidator, followValidator, wrapAsync(followUserController))
 
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router

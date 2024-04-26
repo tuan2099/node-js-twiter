@@ -131,10 +131,19 @@ export const updateMeController = async (req: Request, res: Response, next: Next
 
 export const getProfileController = async (req: Request, res: Response, next: NextFunction) => {
   const { username } = req.params
-  return res.json({})
-  // const user = await userService.getMe(user_id)
-  // return res.json({
-  //   message: USER_MESSAGE.GET_PROFILE_SUCCESS,
-  //   result: user
-  // })
+  const user = await userService.getProfile(username)
+  return res.json({
+    message: USER_MESSAGE.GET_PROFILE_SUCCESS,
+    result: user
+  })
+}
+
+export const followUserController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authourization as TokenPayLoad
+  const { username } = req.params
+  const result = await userService.followUser(user_id, username)
+  return res.json({
+    message: USER_MESSAGE.FOLLOW_SUCCESS,
+    result
+  })
 }

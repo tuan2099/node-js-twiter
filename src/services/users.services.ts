@@ -1,12 +1,13 @@
 import User from '~/models/schemas/User.schema'
 import databaseService from './database.services'
-import { RegisterReqBody } from '~/models/Users/User.request'
+import { RegisterReqBody, UpdateMeReqBody } from '~/models/Users/User.request'
 import { hasPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType, UserVerifyStatus } from '~/constants/enums'
 import RefreshToken from '~/models/schemas/RefreshToken.schema'
 import { ObjectId } from 'mongodb'
 import { USER_MESSAGE } from '~/constants/message'
+import { ErrorWithStatus } from '~/models/Errors'
 
 class UserService {
   // tạo access token
@@ -239,7 +240,30 @@ class UserService {
     return user
   }
 
-  async updateMe(user_id: string, payload: any) {
+  async getProfile(username: string) {
+    const user = await databaseService.users.findOne(
+      { username },
+      {
+        projection: {
+          passord: 0,
+          email_verify_token: 0,
+          forgot_pass_token: 0,
+          verify: 0,
+          create_at: 0,
+          updated_at: 0
+        }
+      }
+    )
+    if (user === null) {
+      throw new ErrorWithStatus({
+        message: USER_MESSAGE.INVALID_USER_ID,
+        status: 404
+      })
+    }
+    return user
+  }
+
+  async updateMe(user_id: string, payload: UpdateMeReqBody) {
     const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
     const user = await databaseService.users.findOneAndUpdate(
       {
@@ -247,14 +271,13 @@ class UserService {
       },
       {
         $set: {
-          ..._payload
+          ...(_payload as UpdateMeReqBody & { date_of_birth?: Date })
         },
         $currentDate: {
           updated_at: true
         }
       }
     )
-
     return user.value
   }
 }
