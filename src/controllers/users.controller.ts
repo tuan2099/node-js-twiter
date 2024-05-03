@@ -140,8 +140,8 @@ export const getProfileController = async (req: Request, res: Response, next: Ne
 
 export const followUserController = async (req: Request, res: Response, next: NextFunction) => {
   const { user_id } = req.decoded_authourization as TokenPayLoad
-  const { username } = req.params
-  const result = await userService.followUser(user_id, username)
+  const { followed_user_id } = req.body
+  const result = await userService.follow(user_id, followed_user_id)
   return res.json({
     message: USER_MESSAGE.FOLLOW_SUCCESS,
     result

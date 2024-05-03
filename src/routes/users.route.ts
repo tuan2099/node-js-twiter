@@ -17,6 +17,7 @@ import { filterMiddleware } from '~/middleware/common.middleware'
 import {
   accessTokenValidator,
   emailVerifyTokenValidator,
+  followValidator,
   forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
