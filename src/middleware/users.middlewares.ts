@@ -13,6 +13,7 @@ import { capitalize, isLength } from 'lodash'
 import { ObjectId } from 'mongodb'
 import { TokenPayLoad } from '~/models/Users/User.request'
 import { UserVerifyStatus } from '~/constants/enums'
+import { REGEX_USERNAME } from '~/constants/regex'
 
 // Khai báo schema sử dung chung
 const passwordSchema: ParamSchema = {
@@ -144,6 +145,29 @@ const nameSchema: ParamSchema = {
       max: 100
     },
     errorMessage: USER_MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_100
+  }
+}
+
+const userIdSchema: ParamSchema = {
+  custom: {
+    options: async (value: string, { req }) => {
+      if (!ObjectId.isValid(value)) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGE.INVALID_USER_ID,
+          status: httpStatus.NOT_FOUND
+        })
+      }
+      const followed_user = await databaseService.users.findOne({
+        _id: new ObjectId(value)
+      })
+
+      if (followed_user === null) {
+        throw new ErrorWithStatus({
+          message: USER_MESSAGE.USER_NOT_FOUND,
+          status: httpStatus.NOT_FOUND
+        })
+      }
+    }
   }
 }
 
@@ -554,6 +578,17 @@ export const updateMeValidator = validate(
             max: 200
           },
           errorMessage: ' từ 1 đến 200 kí tự'
+        },
+        custom: {
+          options: async (value: string, { req }) => {
+            if (!REGEX_USERNAME.test(value)) {
+              throw Error(USER_MESSAGE.USERNAME_INVALID)
+            }
+            const user = await databaseService.users.findOne({ username: value })
+            if (user) {
+              throw Error(USER_MESSAGE.USERNAME_EXISTED)
+            }
+          }
         }
       },
       avatar: {
@@ -613,4 +648,13 @@ export const followValidator = validate(
       }
     }
   })
+)
+
+export const unfollowValidator = validate(
+  checkSchema(
+    {
+      user_id: userIdSchema
+    },
+    ['params']
+  )
 )

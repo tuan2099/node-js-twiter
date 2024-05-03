@@ -277,6 +277,14 @@ class UserService {
         $currentDate: {
           updated_at: true
         }
+      },
+      {
+        returnDocument: 'after',
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        }
       }
     )
     return user.value
@@ -297,6 +305,26 @@ class UserService {
       return {
         message: USER_MESSAGE.FOLLOW_SUCCESS
       }
+    }
+  }
+
+  async unfollow(user_id: string, followed_user_id: string) {
+    const follower = await databaseService.followers.findOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+
+    if (follower === null) {
+      return {
+        message: USER_MESSAGE.UNFOLLOW_SUCCESS
+      }
+    }
+    await databaseService.followers.deleteOne({
+      user_id: new ObjectId(user_id),
+      followed_user_id: new ObjectId(followed_user_id)
+    })
+    return {
+      message: USER_MESSAGE.UNFOLLOW_SUCCESS
     }
   }
 }
