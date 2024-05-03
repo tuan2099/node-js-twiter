@@ -1,5 +1,6 @@
 import express from 'express'
 import {
+  changePasswordController,
   followUserController,
   forgotPasswordController,
   getMeController,
@@ -17,6 +18,7 @@ import {
 import { filterMiddleware } from '~/middleware/common.middleware'
 import {
   accessTokenValidator,
+  changePasswordValidator,
   emailVerifyTokenValidator,
   followValidator,
   forgotPasswordValidator,
@@ -147,5 +149,19 @@ router.delete(
   wrapAsync(unfollowController)
 )
 
+/**
+ * Description: Change password
+ * Path: /change-password
+ * Method: PUT
+ * Header: { Authorization: Bearer <access_token> }
+ * Body: { old_password: string, password: string, confirm_password: string }
+ */
+router.put(
+  '/change-password',
+  accessTokenValidator,
+  verifiedUserValidator,
+  changePasswordValidator,
+  wrapAsync(changePasswordController)
+)
 // router.post('/refresh-token', refreshTokenValidator,wrapAsync(refreshTokenController)
 export default router

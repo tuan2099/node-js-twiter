@@ -157,3 +157,10 @@ export const unfollowController = async (req: Request, res: Response, next: Next
     result
   })
 }
+
+export const changePasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authourization as TokenPayLoad
+  const { password } = req.body
+  const result = await userService.changePassword(user_id, password)
+  return res.json(result)
+}
