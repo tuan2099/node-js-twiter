@@ -1,10 +1,10 @@
 import fs from 'fs'
 import path from 'path'
+import { UPLOAD_TEMP_DIR } from '~/constants/dir'
 
 export const initFolder = () => {
-  const uploadFolderPath = path.resolve('uploads')
-  if (!fs.existsSync(uploadFolderPath)) {
-    fs.mkdirSync(uploadFolderPath, {
+  if (!fs.existsSync(UPLOAD_TEMP_DIR)) {
+    fs.mkdirSync(UPLOAD_TEMP_DIR, {
       recursive: true
     })
   }
@@ -13,7 +13,7 @@ export const initFolder = () => {
 export const handleUploadSingleImage = async (req: any) => {
   const formidable = (await import('formidable')).default
   const form = formidable({
-    uploadDir: path.resolve('uploads'),
+    uploadDir: UPLOAD_TEMP_DIR,
     maxFiles: 1,
     keepExtensions: true,
     maxFileSize: 300 * 1024,
@@ -25,8 +25,8 @@ export const handleUploadSingleImage = async (req: any) => {
       return valid
     }
   })
-  return new Promise((resolve, reject) => {
-    form.parse(req, (err, fileds, files) => {
+  return new Promise<any>((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
       if (err) {
         return reject(err)
       }
@@ -34,7 +34,13 @@ export const handleUploadSingleImage = async (req: any) => {
       if (!Boolean(files.image)) {
         return reject(new Error('File not found'))
       }
-      resolve(files)
+      resolve(files.image)
     })
   })
+}
+
+export const getNameFromFullname = (fullname: string) => {
+  const namearr = fullname.split('.')
+  namearr.pop()
+  return namearr.join('')
 }
