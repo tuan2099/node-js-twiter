@@ -4,17 +4,18 @@ import DatabaseService from '~/services/database.services'
 import { defaultErrorHandler } from '~/middleware/error.middleware'
 import mediaRouter from './routes/media.route'
 import { initFolder } from './utils/file'
+import { config } from 'dotenv'
+
+config()
+
 const app = express()
-const port = 3000
+const port = process.env.PORT || 4000
 
 initFolder()
-app.get('/', (req, res) => {
-  res.send('helo')
-})
 
 app.use(express.json())
 app.use('/api', router)
-app.use('media', mediaRouter)
+app.use('/media', mediaRouter)
 
 DatabaseService.connect()
 app.use(defaultErrorHandler)
