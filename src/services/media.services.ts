@@ -4,6 +4,9 @@ import sharp from 'sharp'
 import { UPLOAD_DIR } from '~/constants/dir'
 import path from 'path'
 import fs from 'fs'
+import { isProduction } from '~/constants/config'
+import { config } from 'dotenv'
+config()
 
 class MediaService {
   async handleUploadSingleImage(req: Request) {
@@ -12,7 +15,7 @@ class MediaService {
     const newPath = path.resolve(UPLOAD_DIR, `${newName}.jpg`)
     await sharp(file.filePath).jpeg().toFile(newPath)
     fs.unlinkSync(file.filePath)
-    return `${newName}`
+    return isProduction ? `${process.env.HOST}/medias/${newName}.jpg` : `http://localhost${process.env.PORT}/media/${newName}.jpg`
   }
 }
 
