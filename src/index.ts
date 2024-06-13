@@ -4,8 +4,9 @@ import DatabaseService from '~/services/database.services'
 import { defaultErrorHandler } from '~/middleware/error.middleware'
 import mediaRouter from './routes/media.route'
 import { initFolder } from './utils/file'
-import { UPLOAD_DIR } from './constants/dir'
+import { UPLOAD_IMAGE_DIR } from './constants/dir'
 import { config } from 'dotenv'
+import staticRouter from './routes/static.route'
 
 config()
 
@@ -16,8 +17,9 @@ initFolder()
 
 app.use(express.json())
 app.use('/api', router)
-app.use('media', mediaRouter)
-app.use(express.static(UPLOAD_DIR))
+app.use('/media', mediaRouter)
+app.use('/static', staticRouter)
+app.use(express.static(UPLOAD_IMAGE_DIR))
 
 DatabaseService.connect()
 app.use(defaultErrorHandler)
