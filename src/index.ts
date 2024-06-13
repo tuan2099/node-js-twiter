@@ -4,6 +4,7 @@ import DatabaseService from '~/services/database.services'
 import { defaultErrorHandler } from '~/middleware/error.middleware'
 import mediaRouter from './routes/media.route'
 import { initFolder } from './utils/file'
+import { UPLOAD_DIR } from './constants/dir'
 const app = express()
 const port = 3000
 
@@ -15,7 +16,7 @@ app.get('/', (req, res) => {
 app.use(express.json())
 app.use('/api', router)
 app.use('media', mediaRouter)
-
+app.use(express.static(UPLOAD_DIR))
 DatabaseService.connect()
 app.use(defaultErrorHandler)
 
