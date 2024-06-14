@@ -19,7 +19,7 @@ app.use(express.json())
 app.use('/api', router)
 app.use('/media', mediaRouter)
 app.use('/static', staticRouter)
-app.use(express.static(UPLOAD_IMAGE_DIR))
+app.use('/static/video', express.static(UPLOAD_IMAGE_DIR))
 
 DatabaseService.connect()
 app.use(defaultErrorHandler)
