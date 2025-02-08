@@ -8,7 +8,7 @@ import {
   LogoutReqBody,
   RegisterReqBody,
   TokenPayload,
-  VerifyEmailReqBody
+  VerifyEmailReqBody, VerifyForgotPasswordReqBody
 } from '~/models/requests/User.requests'
 import databaseServices from '~/services/database.services'
 import { ObjectId } from 'mongodb'
@@ -102,7 +102,7 @@ export const forgotPasswordController = async (
 }
 
 export const verifyForgotPasswordController = async (
-  req: express.Request<ParamsDictionary, any, ForgotPasswordReqBody>,
+  req: express.Request<ParamsDictionary, any, VerifyForgotPasswordReqBody>,
   res: express.Response
 ) => {
   return res.json({
