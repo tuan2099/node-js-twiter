@@ -1,15 +1,17 @@
 import express from 'express'
 import {
-  accessTokenValidator, emailVVerifyTokenValidator,
+  accessTokenValidator, emailVVerifyTokenValidator, forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
-  registerValidator
+  registerValidator, verifyForgotPasswordTokenValidator
 } from '~/middlewares/user.middleware'
 import {
-  emailVerifyValidator,
+  emailVerifyController,
+  forgotPasswordController,
   loginController,
   logoutController,
-  registerController
+  registerController,
+  resendVerifyEmailController, verifyForgotPasswordController
 } from '~/controllers/users.controller'
 import { wrapRequestHandler } from '~/utils/handlers'
 const usersRouter = express.Router()
@@ -45,5 +47,35 @@ usersRouter.post('/logout', refreshTokenValidator, accessTokenValidator, wrapReq
  method: 'POST'
  body: {email_verify_token: string}
  **/
-usersRouter.post('/verify-email', emailVVerifyTokenValidator, wrapRequestHandler(emailVerifyValidator))
+usersRouter.post('/verify-email', emailVVerifyTokenValidator, wrapRequestHandler(emailVerifyController))
+
+/**
+ Des: Verify email when user click on link in email
+ path: /verify-email
+ method: 'POST'
+ header: {Authorization : Bearer <access token>}
+ **/
+usersRouter.post(
+  '/resend-verify-email',
+  accessTokenValidator,
+  emailVVerifyTokenValidator,
+  wrapRequestHandler(resendVerifyEmailController)
+)
+
+/**
+ Des: Submit email to reset password
+ path: /forgot-password
+ method: 'POST'
+ body: {email : string}
+ **/
+usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler(forgotPasswordController))
+
+/**
+ Des: Submit email to reset password
+ path: /verify-forgot-password-token
+ method: 'POST'
+ body: {forgot_password_token : string}
+ **/
+usersRouter.post('/verify-forgot-password-token', verifyForgotPasswordTokenValidator, wrapRequestHandler(verifyForgotPasswordController))
+
 export default usersRouter
