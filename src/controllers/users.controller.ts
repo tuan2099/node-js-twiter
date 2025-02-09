@@ -7,14 +7,17 @@ import {
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
-  TokenPayload,
-  VerifyEmailReqBody, VerifyForgotPasswordReqBody
+  ResetPasswordReqBody,
+  TokenPayload, UpdateMeReqBody,
+  VerifyEmailReqBody,
+  VerifyForgotPasswordReqBody
 } from '~/models/requests/User.requests'
 import databaseServices from '~/services/database.services'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { UserVerifyStatus } from '~/constants/enums'
 import User from '~/models/schemas/User.schema'
+import { pick } from 'lodash'
 
 export const loginController = async (
   req: express.Request<ParamsDictionary, any, LoginReqBody>,
@@ -22,7 +25,7 @@ export const loginController = async (
 ) => {
   const { user }: any = req
   const user_id = user._id
-  const result = await userService.login(user_id.toString())
+  const result = await userService.login({ user_id: user_id.toString(), verify: user.verify })
   return res.json({
     message: USERS_MESSAGES.LOGIN_SUCCESS,
     result
@@ -96,8 +99,8 @@ export const forgotPasswordController = async (
   req: express.Request<ParamsDictionary, any, ForgotPasswordReqBody>,
   res: express.Response
 ) => {
-  const { _id } = req.user as User
-  const result = await userService.forgotPassword((_id as ObjectId).toString())
+  const { _id, verify } = req.user as User
+  const result = await userService.forgotPassword({ user_id: (_id as ObjectId).toString(), verify })
   return res.json(result)
 }
 
@@ -107,5 +110,36 @@ export const verifyForgotPasswordController = async (
 ) => {
   return res.json({
     message: USERS_MESSAGES.VERIFY_FORGOT_PASSWORD_SUCCESS
+  })
+}
+
+export const resetPasswordController = async (
+  req: express.Request<ParamsDictionary, any, ResetPasswordReqBody>,
+  res: express.Response
+) => {
+  const { user_id } = req.decoded_forgot_password_token as TokenPayload
+  const { password } = req.body
+  const result = userService.resetPassword(user_id, password)
+  return res.json(result)
+}
+
+export const meController = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const user = await userService.getMe(user_id)
+  return res.json({ message: USERS_MESSAGES.GET_ME_SUCCESS, result: user })
+}
+export const updateMeController = async (
+  req: express.Request<ParamsDictionary, any, UpdateMeReqBody>,
+  res: express.Response
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { body } = req
+  const user = userService.updateMe(user_id, body)
+  return res.json({
+    message: USERS_MESSAGES.UPDATE_ME_SUCCESS,
+    result: user
   })
 }

@@ -3,17 +3,22 @@ import {
   accessTokenValidator, emailVVerifyTokenValidator, forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
-  registerValidator, verifyForgotPasswordTokenValidator
+  registerValidator, resetPasswordValidator, updateMeValidator, verifyForgotPasswordTokenValidator, verifyUserValidator
 } from '~/middlewares/user.middleware'
 import {
   emailVerifyController,
   forgotPasswordController,
   loginController,
   logoutController,
+  meController,
   registerController,
-  resendVerifyEmailController, verifyForgotPasswordController
+  resendVerifyEmailController,
+  resetPasswordController, updateMeController,
+  verifyForgotPasswordController
 } from '~/controllers/users.controller'
 import { wrapRequestHandler } from '~/utils/handlers'
+import { filterMiddleware } from '~/middlewares/common.middlewares'
+import { UpdateMeReqBody } from '~/models/requests/User.requests'
 const usersRouter = express.Router()
 
 /**
@@ -76,6 +81,51 @@ usersRouter.post('/forgot-password', forgotPasswordValidator, wrapRequestHandler
  method: 'POST'
  body: {forgot_password_token : string}
  **/
-usersRouter.post('/verify-forgot-password-token', verifyForgotPasswordTokenValidator, wrapRequestHandler(verifyForgotPasswordController))
+usersRouter.post(
+  '/verify-forgot-password-token',
+  verifyForgotPasswordTokenValidator,
+  wrapRequestHandler(verifyForgotPasswordController)
+)
+
+/**
+ Des: Reset Password
+ path: /reset-password
+ method: 'POST'
+ body: {forgot_password_token : string, password: string, confirm_password: string}
+ **/
+usersRouter.post('/verify-forgot-password-token', resetPasswordValidator, wrapRequestHandler(resetPasswordController))
+
+/**
+ Des: Get my profile
+ path: /me
+ method: 'GET'
+ header: {Authorization: Bearer <access_token>}
+ **/
+usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(meController))
+
+/**
+ Des: Update my profile
+ path: /me
+ method: 'PATCH'
+ header: {Authorization: Bearer <access_token>}
+ body: UserSchema
+ **/
+usersRouter.patch(
+  '/me',
+  accessTokenValidator,
+  verifyUserValidator,
+  updateMeValidator,
+  filterMiddleware<UpdateMeReqBody>([
+    'name',
+    'email',
+    'date_of_birth',
+    'bio',
+    'location',
+    'username',
+    'website',
+    'cover_photo'
+  ]),
+  wrapRequestHandler(updateMeController)
+)
 
 export default usersRouter
