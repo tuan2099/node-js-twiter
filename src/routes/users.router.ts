@@ -1,19 +1,33 @@
 import express from 'express'
 import {
-  accessTokenValidator, emailVVerifyTokenValidator, forgotPasswordValidator,
+  accessTokenValidator,
+  changePasswordValidator,
+  emailVVerifyTokenValidator,
+  followValidator,
+  forgotPasswordValidator,
   loginValidator,
   refreshTokenValidator,
-  registerValidator, resetPasswordValidator, updateMeValidator, verifyForgotPasswordTokenValidator, verifyUserValidator
+  registerValidator,
+  resetPasswordValidator,
+  unfollowValidator,
+  updateMeValidator,
+  verifyForgotPasswordTokenValidator,
+  verifyUserValidator
 } from '~/middlewares/user.middleware'
 import {
+  changePasswordController,
   emailVerifyController,
+  followController,
   forgotPasswordController,
+  getProfileController,
   loginController,
   logoutController,
   meController,
   registerController,
   resendVerifyEmailController,
-  resetPasswordController, updateMeController,
+  resetPasswordController,
+  unfollowController,
+  updateMeController,
   verifyForgotPasswordController
 } from '~/controllers/users.controller'
 import { wrapRequestHandler } from '~/utils/handlers'
@@ -104,6 +118,14 @@ usersRouter.post('/verify-forgot-password-token', resetPasswordValidator, wrapRe
 usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(meController))
 
 /**
+ Des: Get user info
+ path: /me
+ method: 'GET'
+ header: {Authorization: Bearer <access_token>}
+ **/
+usersRouter.get('/me', accessTokenValidator, wrapRequestHandler(meController))
+
+/**
  Des: Update my profile
  path: /me
  method: 'PATCH'
@@ -128,4 +150,54 @@ usersRouter.patch(
   wrapRequestHandler(updateMeController)
 )
 
+/**
+ Des: Get user profile
+ path: /:username
+ method: 'GET'
+ **/
+usersRouter.get('/:username', wrapRequestHandler(getProfileController))
+
+/**
+ Des: Follow user
+ path: /follow
+ method: 'POST'
+ header: {Authorization: Bearer <access_token>}
+ body: {followed_user_id: string}
+ **/
+usersRouter.post(
+  '/follow',
+  accessTokenValidator,
+  verifyUserValidator,
+  followValidator,
+  wrapRequestHandler(followController)
+)
+
+/**
+ Des: UnFollow user
+ path: /follow/user_id
+ method: 'DELETE'
+ header: {Authorization: Bearer <access_token>}
+ **/
+usersRouter.delete(
+  '/follow/:user_id',
+  accessTokenValidator,
+  verifyUserValidator,
+  unfollowValidator,
+  wrapRequestHandler(unfollowController)
+)
+
+/**
+ Des: Change Password
+ path: /change-password
+ method: 'PUT'
+ header: {Authorization: Bearer <access_token>}
+ Body: { old_password: string, password: string, confirm_password: string }
+ **/
+usersRouter.put(
+  '/change-password',
+  accessTokenValidator,
+  verifyUserValidator,
+  changePasswordValidator,
+  wrapRequestHandler(changePasswordController)
+)
 export default usersRouter

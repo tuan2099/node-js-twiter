@@ -3,12 +3,14 @@ import userService from '~/services/user.services'
 import { ParamsDictionary } from 'express-serve-static-core'
 import { USERS_MESSAGES } from '~/constants/messages'
 import {
-  ForgotPasswordReqBody,
+  ChangePasswordReqBody,
+  FollowReqBody,
+  ForgotPasswordReqBody, GetProfileReqParams,
   LoginReqBody,
   LogoutReqBody,
   RegisterReqBody,
   ResetPasswordReqBody,
-  TokenPayload, UpdateMeReqBody,
+  TokenPayload, UnfollowReqParams, UpdateMeReqBody,
   VerifyEmailReqBody,
   VerifyForgotPasswordReqBody
 } from '~/models/requests/User.requests'
@@ -131,6 +133,7 @@ export const meController = async (
   const user = await userService.getMe(user_id)
   return res.json({ message: USERS_MESSAGES.GET_ME_SUCCESS, result: user })
 }
+
 export const updateMeController = async (
   req: express.Request<ParamsDictionary, any, UpdateMeReqBody>,
   res: express.Response
@@ -142,4 +145,39 @@ export const updateMeController = async (
     message: USERS_MESSAGES.UPDATE_ME_SUCCESS,
     result: user
   })
+}
+
+export const getProfileController = async (req: express.Request<GetProfileReqParams>, res: express.Response) => {
+  const { username } = req.params
+  const user = await userService.getProfile(username)
+  return res.json({
+    message: USERS_MESSAGES.GET_PROFILE_SUCCESS,
+    result: user
+  })
+}
+export const followController = async (
+  req: express.Request<ParamsDictionary, any, FollowReqBody>,
+  res: express.Response
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { followed_user_id } = req.body
+  const result = await userService.follow(user_id, followed_user_id)
+  return res.json({ result })
+}
+
+export const unfollowController = async (req: express.Request<UnfollowReqParams>, res: express.Response) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { user_id: follow_user_id } = req.params
+  const result = await userService.unfollow(user_id, follow_user_id)
+  return res.json(result)
+}
+
+export const changePasswordController = async (
+  req: express.Request<ParamsDictionary, any, ChangePasswordReqBody>,
+  res: express.Response
+) => {
+  const { user_id } = req.decoded_authorization as TokenPayload
+  const { password } = req.body
+  const result = await userService.changePassword(user_id, password)
+  return res.json(result)
 }
